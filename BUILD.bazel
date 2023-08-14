@@ -59,7 +59,7 @@ container_run_and_commit(
 )
 
 container_image(
-    name = "test-bazel-build",
+    name = "gitpod-bazel-build",
     base = ":configure_gitpod",
     user = "gitpod",
     workdir = "/home/gitpod",
@@ -68,8 +68,8 @@ container_image(
 container_push(
     name = "publish",
     format = "Docker",
-    image = ":test-bazel-build",
+    image = ":gitpod-bazel-build",
     registry = "index.docker.io",
-    repository = "vulkoingim/bazel_docker_test",
+    repository = "gitpod/example-bazel-image",
     tag = "latest",
 )

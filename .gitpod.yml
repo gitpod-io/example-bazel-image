@@ -1,1 +1,1 @@
-image: vulkoingim/bazel_docker_test:latest
+image: gitpod/example-bazel-image:latest
