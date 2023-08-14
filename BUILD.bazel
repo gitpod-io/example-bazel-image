@@ -1,15 +1,41 @@
 load("@io_bazel_rules_docker//container:container.bzl", "container_image")
 load("@io_bazel_rules_docker//docker/package_managers:download_pkgs.bzl", "download_pkgs")
 load("@io_bazel_rules_docker//docker/package_managers:install_pkgs.bzl", "install_pkgs")
+load("@io_bazel_rules_docker//docker/util:run.bzl", "container_run_and_commit")
 load("@io_bazel_rules_docker//container:container.bzl", "container_push")
 
 download_pkgs(
     name = "installables_tar",
     image_tar = "@ubuntu_latest//image:image.tar",
     packages = [
+        "bash-completion",
+        "build-essential",
+        "curl",
+        "emacs-nox",
+        "fish",
         "git",
         "git-lfs",
+        "htop",
+        "iputils-ping",
+        "jq",
+        "less",
+        "locales",
+        "lsof",
+        "man-db",
+        "multitail",
+        "nano",
+        "ninja-build",
+        "ripgrep",
+        "software-properties-common",
+        "ssl-cert",
+        "stow",
         "sudo",
+        "time",
+        "unzip",
+        "vim",
+        "wget",
+        "zip",
+        "zsh",
     ],
 )
 
@@ -21,9 +47,22 @@ install_pkgs(
     output_image_name = "pkgs_image",
 )
 
+container_run_and_commit(
+    name = "configure_gitpod",
+    commands = [
+        "useradd -l -u 33333 -G sudo -md /home/gitpod -s /bin/bash -p gitpod gitpod",
+        "sed -i.bkp -e '/Defaults\\tuse_pty/d' -e 's/%sudo\\s\\+ALL=(ALL\\(:ALL\\)\\?)\\s\\+ALL/%sudo ALL=NOPASSWD:ALL/g' /etc/sudoers",
+        "mkdir /workspace && chown -hR gitpod:gitpod /workspace",
+        "mkdir -p /home/gitpod/.local/bin && chown -hR gitpod:gitpod /home/gitpod",
+    ],
+    image = ":pkgs_image.tar",
+)
+
 container_image(
     name = "test-bazel-build",
-    base = ":pkgs_image",
+    base = ":configure_gitpod",
+    user = "gitpod",
+    workdir = "/home/gitpod",
 )
 
 container_push(
@@ -32,5 +71,5 @@ container_push(
     image = ":test-bazel-build",
     registry = "index.docker.io",
     repository = "vulkoingim/bazel_docker_test",
-    tag = "1",
+    tag = "latest",
 )
