@@ -1,0 +1,36 @@
+load("@io_bazel_rules_docker//container:container.bzl", "container_image")
+load("@io_bazel_rules_docker//docker/package_managers:download_pkgs.bzl", "download_pkgs")
+load("@io_bazel_rules_docker//docker/package_managers:install_pkgs.bzl", "install_pkgs")
+load("@io_bazel_rules_docker//container:container.bzl", "container_push")
+
+download_pkgs(
+    name = "installables_tar",
+    image_tar = "@ubuntu_latest//image:image.tar",
+    packages = [
+        "git",
+        "git-lfs",
+        "sudo",
+    ],
+)
+
+install_pkgs(
+    name = "pkgs_image",
+    image_tar = "@ubuntu_latest//image",
+    installables_tar = ":installables_tar.tar",
+    installation_cleanup_commands = "rm -rf /var/lib/apt/lists/*",
+    output_image_name = "pkgs_image",
+)
+
+container_image(
+    name = "test-bazel-build",
+    base = ":pkgs_image",
+)
+
+container_push(
+    name = "publish",
+    format = "Docker",
+    image = ":test-bazel-build",
+    registry = "index.docker.io",
+    repository = "vulkoingim/bazel_docker_test",
+    tag = "1",
+)
