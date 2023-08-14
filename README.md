@@ -31,6 +31,8 @@ workspace without the user and sudoers membership - it is not recommended as it 
 
 ## Usage
 
+Modify the `BUILD.bazel` accordingly and run:
+
 ```bash
 bazel run :publish
 ```
